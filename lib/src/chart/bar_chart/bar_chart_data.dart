@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 /// It holds data needed to draw a bar chart,
 /// including bar lines, colors, spaces, touches, ...
 class BarChartData extends AxisChartData {
-
   /// [BarChart] draws [barGroups] that each of them contains a list of [BarChartRodData].
   final List<BarChartGroupData> barGroups;
 
@@ -60,7 +59,7 @@ class BarChartData extends AxisChartData {
     RangeAnnotations rangeAnnotations = const RangeAnnotations(),
     Color backgroundColor,
   }) : super(
-    axisTitleData: axisTitleData,
+          axisTitleData: axisTitleData,
           gridData: gridData,
           borderData: borderData,
           rangeAnnotations: rangeAnnotations,
@@ -182,7 +181,6 @@ enum BarChartAlignment {
 /// if you want to have grouped bars, simply put them in each group,
 /// otherwise just pass one of them in each group.
 class BarChartGroupData {
-
   /// defines the group's value among the x axis (simply set it incrementally).
   @required
   final int x;
@@ -256,7 +254,6 @@ class BarChartGroupData {
 
 /// Holds data about rendering each rod (or bar) in the [BarChart].
 class BarChartRodData {
-
   /// [BarChart] renders rods vertically from zero to [y].
   final double y;
 
@@ -277,6 +274,12 @@ class BarChartRodData {
   /// If you are a fan of stacked charts (If you don't know what is it, google it),
   /// you can fill up the [rodStackItem] to have a Stacked Chart.
   final List<BarChartRodStackItem> rodStackItem;
+
+  final String title;
+  final TextStyle titleStyle;
+  final TextStyle sideTitleStyle;
+  final double titlePadding;
+  final bool showTitle;
 
   /// [BarChart] renders rods vertically from zero to [y],
   /// and the x is equivalent to the [BarChartGroupData.x] value.
@@ -308,7 +311,12 @@ class BarChartRodData {
     BorderRadius borderRadius,
     this.backDrawRodData = const BackgroundBarChartRodData(),
     this.rodStackItem = const [],
-  }) :borderRadius = normalizeBorderRadius(borderRadius, width);
+    this.title,
+    this.showTitle = false,
+    this.titleStyle = const TextStyle(color: Colors.black, fontSize: 12),
+    this.sideTitleStyle = const TextStyle(color: Colors.white, fontSize: 12),
+    this.titlePadding = 4,
+  }) : borderRadius = normalizeBorderRadius(borderRadius, width);
 
   /// Copies current [BarChartRodData] to a new [BarChartRodData],
   /// and replaces provided values.
@@ -319,6 +327,11 @@ class BarChartRodData {
     Radius borderRadius,
     BackgroundBarChartRodData backDrawRodData,
     List<BarChartRodStackItem> rodStackItem,
+    String title,
+    bool showTitle,
+    TextStyle titleStyle,
+    TextStyle sideTitleStyle,
+    double titlePadding,
   }) {
     return BarChartRodData(
       y: y ?? this.y,
@@ -327,6 +340,11 @@ class BarChartRodData {
       borderRadius: borderRadius ?? this.borderRadius,
       backDrawRodData: backDrawRodData ?? this.backDrawRodData,
       rodStackItem: rodStackItem ?? this.rodStackItem,
+      title: title ?? this.title,
+      showTitle: showTitle ?? this.showTitle,
+      titleStyle: titleStyle ?? this.titleStyle,
+      sideTitleStyle: sideTitleStyle ?? this.sideTitleStyle,
+      titlePadding: titlePadding ?? this.titlePadding,
     );
   }
 
@@ -339,6 +357,11 @@ class BarChartRodData {
       y: lerpDouble(a.y, b.y, t),
       backDrawRodData: BackgroundBarChartRodData.lerp(a.backDrawRodData, b.backDrawRodData, t),
       rodStackItem: lerpBarChartRodStackList(a.rodStackItem, b.rodStackItem, t),
+      title: b.title,
+      showTitle: b.showTitle,
+      titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
+      sideTitleStyle: TextStyle.lerp(a.sideTitleStyle, b.sideTitleStyle, t),
+      titlePadding: lerpDouble(a.titlePadding, b.titlePadding, t),
     );
   }
 }
@@ -348,7 +371,6 @@ class BarChartRodData {
 /// Each [BarChartRodData] can have a list of [BarChartRodStackItem] (with different colors
 /// and position) to represent a Stacked Chart rod,
 class BarChartRodStackItem {
-
   /// Renders a Stacked Chart section from [fromY]
   final double fromY;
 
@@ -379,6 +401,8 @@ class BarChartRodStackItem {
     double fromY,
     double toY,
     Color color,
+    String title,
+    bool showTitle,
   }) {
     return BarChartRodStackItem(
       fromY ?? this.fromY,
@@ -403,7 +427,6 @@ class BarChartRodStackItem {
 /// it uses to have a bar with a passive color in rear of the rod,
 /// for example you can use it as the maximum value place holder in rear of your rod.
 class BackgroundBarChartRodData {
-
   /// Determines to show or hide this
   final bool show;
 
@@ -439,7 +462,6 @@ class BackgroundBarChartRodData {
 /// in a simple way, each chart captures the touch events, and passes a concrete
 /// instance of [FlTouchInput] to the painter, and gets a generated [BarTouchResponse].
 class BarTouchData extends FlTouchData {
-
   /// Configs of how touch tooltip popup.
   final BarTouchTooltipData touchTooltipData;
 
@@ -499,7 +521,6 @@ class BarTouchData extends FlTouchData {
 
 /// Holds representation data for showing tooltip popup on top of rods.
 class BarTouchTooltipData {
-
   /// The tooltip background color.
   final Color tooltipBgColor;
 
@@ -578,7 +599,6 @@ BarTooltipItem defaultBarTooltipItem(
 
 /// Holds data needed for showing custom tooltip content.
 class BarTooltipItem {
-
   /// Text of the content.
   final String text;
 
@@ -594,7 +614,6 @@ class BarTooltipItem {
 /// You can override [BarTouchData.touchCallback] to handle touch events,
 /// it gives you a [BarTouchResponse] and you can do whatever you want.
 class BarTouchResponse extends BaseTouchResponse {
-
   /// Gives information about the touched spot
   final BarTouchedSpot spot;
 
@@ -629,7 +648,6 @@ class BarTouchedSpot extends TouchedSpot {
     FlSpot spot,
     Offset offset,
   ) : super(spot, offset);
-
 }
 
 /// It lerps a [BarChartData] to another [BarChartData] (handles animation for updating values)
@@ -639,5 +657,4 @@ class BarChartDataTween extends Tween<BarChartData> {
   /// Lerps a [BarChartData] based on [t] value, check [Tween.lerp].
   @override
   BarChartData lerp(double t) => begin.lerp(begin, end, t);
-
 }
